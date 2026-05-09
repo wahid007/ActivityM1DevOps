@@ -16,9 +16,18 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Text('Flutter Demo Home Page'),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Mobile App'),
+          actions: [IconButton(onPressed: null, icon: Icon(Icons.cloud))],
+        ),
+        body: Text('Corps'),
+        floatingActionButton: FloatingActionButton(
+          onPressed: null,
+          child: IconButton(onPressed: null, icon: Icon(Icons.add)),
+        ),
+      ),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
-
-

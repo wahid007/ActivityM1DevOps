@@ -1,10 +1,437 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Étudiants — iSeTT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:      #0b0f1a;
+            --surface: #111827;
+            --card:    #161d2e;
+            --border:  #1e2d45;
+            --accent:  #00d4ff;
+            --accent2: #ff6b35;
+            --accent3: #a78bfa;
+            --text:    #e8edf5;
+            --muted:   #5a6a80;
+            --success: #22c55e;
+            --radius:  12px;
+        }
+
+        html, body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; }
+
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image: linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+        .orb-1 { width: 500px; height: 500px; background: rgba(0,212,255,.07); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(255,107,53,.06); bottom: -80px; right: -80px; }
+        .orb-3 { width: 300px; height: 300px; background: rgba(167,139,250,.05); top: 40%; left: 50%; }
+
+        .wrapper { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 48px 24px 80px; }
+
+        /* ── Header ── */
+        header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 48px; animation: fadeDown .6s ease both; }
+        .logo { display: flex; align-items: center; gap: 12px; }
+        .logo-badge { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #0080a0); display: grid; place-items: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; color: #fff; }
+        .logo-text h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+        .logo-text span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+        .header-meta { display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); animation: pulse 2s ease infinite; }
+        .status-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* ── Hero ── */
+        .hero { margin-bottom: 40px; animation: fadeDown .6s .1s ease both; }
+        .hero h2 { font-family: 'Syne', sans-serif; font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.1; letter-spacing: -1px; }
+        .hero h2 .accent { color: var(--accent); }
+        .hero p { margin-top: 10px; color: var(--muted); font-size: 12px; letter-spacing: .5px; }
+
+        /* ── Stats ── */
+        .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; animation: fadeDown .6s .15s ease both; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; display: flex; align-items: center; gap: 12px; min-width: 130px; }
+        .stat-icon { font-size: 18px; }
+        .stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); line-height: 1; }
+        .stat-val.orange { color: var(--accent2); }
+        .stat-val.purple { color: var(--accent3); }
+        .stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+        /* ── Tabs ── */
+        .tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; animation: fadeDown .6s .2s ease both; width: fit-content; }
+        .tab { padding: 9px 20px; border-radius: 9px; font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .2s; letter-spacing: .5px; }
+        .tab.active { background: var(--accent); color: #000; font-weight: 500; }
+        .tab:not(.active):hover { color: var(--text); background: var(--border); }
+
+        /* ── Toolbar ── */
+        .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 24px; animation: fadeDown .6s .25s ease both; }
+        .search-wrap { position: relative; flex: 1; min-width: 200px; }
+        .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+        #searchInput { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 11px 14px 11px 38px; border-radius: var(--radius); outline: none; transition: border-color .2s, box-shadow .2s; }
+        #searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,.1); }
+        #searchInput::placeholder { color: var(--muted); }
+
+        /* ── Dept filter pills ── */
+        .dept-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; animation: fadeDown .6s .28s ease both; }
+        .pill { padding: 6px 14px; border-radius: 20px; font-size: 11px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all .2s; letter-spacing: .5px; font-family: 'DM Mono', monospace; }
+        .pill.active { background: rgba(0,212,255,.12); border-color: var(--accent); color: var(--accent); }
+        .pill:hover:not(.active) { border-color: var(--muted); color: var(--text); }
+
+        /* ── Buttons ── */
+        .btn { display: inline-flex; align-items: center; gap: 7px; padding: 11px 18px; border-radius: var(--radius); font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; letter-spacing: .5px; cursor: pointer; border: none; transition: all .2s; white-space: nowrap; }
+        .btn-primary { background: var(--accent); color: #000; }
+        .btn-primary:hover { background: #33ddff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,212,255,.3); }
+        .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Students table ── */
+        .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation: fadeUp .6s .3s ease both; }
+        .table-header-row { display: grid; grid-template-columns: 55px 1fr 100px 130px 1fr 130px; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+        .student-row { display: grid; grid-template-columns: 55px 1fr 100px 130px 1fr 130px; align-items: center; padding: 15px 24px; border-bottom: 1px solid rgba(30,45,69,.6); transition: background .15s; opacity: 0; animation: rowIn .4s ease forwards; }
+        .student-row:last-child { border-bottom: none; }
+        .student-row:hover { background: rgba(0,212,255,.04); }
+        .row-id { font-size: 11px; color: var(--muted); }
+        .row-nom { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; }
+        .row-cin { font-size: 11px; color: var(--muted); }
+        .row-email { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; padding: 3px 9px; border-radius: 20px; width: fit-content; }
+        .badge-dept { background: rgba(167,139,250,.1); color: var(--accent3); border: 1px solid rgba(167,139,250,.2); }
+        .badge-date { background: rgba(0,212,255,.07); color: var(--accent); border: 1px solid rgba(0,212,255,.15); }
+
+        /* ── Department cards ── */
+        .dept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; animation: fadeUp .6s .3s ease both; }
+        .dept-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: border-color .2s, transform .2s; }
+        .dept-card:hover { border-color: rgba(167,139,250,.4); transform: translateY(-2px); }
+        .dept-card-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .dept-name { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
+        .dept-count { background: rgba(167,139,250,.12); color: var(--accent3); border: 1px solid rgba(167,139,250,.2); border-radius: 20px; font-size: 11px; padding: 3px 10px; }
+        .dept-student-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 24px; border-bottom: 1px solid rgba(30,45,69,.5); transition: background .15s; }
+        .dept-student-row:last-child { border-bottom: none; }
+        .dept-student-row:hover { background: rgba(167,139,250,.04); }
+        .dept-student-nom { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; }
+        .dept-student-cin { font-size: 10px; color: var(--muted); }
+        .dept-student-email { font-size: 10px; color: var(--muted); text-align: right; }
+        .dept-student-age { font-size: 11px; color: var(--accent2); margin-top: 2px; text-align: right; }
+        .dept-empty { padding: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+
+        /* ── States ── */
+        .state-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 64px 24px; color: var(--muted); }
+        .state-icon { font-size: 40px; }
+        .state-box p { font-size: 13px; letter-spacing: .5px; }
+        .spinner { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+        .error-state .state-icon { color: var(--accent2); }
+
+        /* ── Footer ── */
+        footer { margin-top: 48px; text-align: center; font-size: 11px; color: var(--muted); letter-spacing: .5px; animation: fadeDown .6s .4s ease both; }
+        footer span { color: var(--accent); }
+
+        /* ── Animations ── */
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+        @keyframes fadeUp   { from { opacity: 0; transform: translateY(20px);  } to { opacity: 1; transform: none; } }
+        @keyframes rowIn    { from { opacity: 0; transform: translateX(-8px);  } to { opacity: 1; transform: none; } }
+        @keyframes spin     { to   { transform: rotate(360deg); } }
+        @keyframes pulse    { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+        /* ── Responsive ── */
+        @media (max-width: 700px) {
+            .table-header-row, .student-row { grid-template-columns: 40px 1fr 90px; }
+            .col-cin, .row-cin, .col-email, .row-email, .col-dept, .badge-dept, .col-date, .badge-date { display: none; }
+            .dept-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-$END$
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrapper">
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <div class="logo-badge">iST</div>
+            <div class="logo-text">
+                <h1>Étudiant Service</h1>
+                <span>Système de gestion académique</span>
+            </div>
+        </div>
+        <div class="header-meta">
+            <div class="status-dot"></div>
+            <span class="status-label">API connectée</span>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="hero">
+        <h2>Gestion des <span class="accent">Étudiants</span></h2>
+        <p>GET /api/etudiants &nbsp;·&nbsp; GET /api/departements — données en temps réel</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div>
+                <div class="stat-val" id="statTotal">—</div>
+                <div class="stat-lbl">Étudiants</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏛</div>
+            <div>
+                <div class="stat-val orange" id="statDepts">—</div>
+                <div class="stat-lbl">Départements</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔍</div>
+            <div>
+                <div class="stat-val purple" id="statFiltered">—</div>
+                <div class="stat-lbl">Affichés</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('etudiants', this)">👤 Étudiants</button>
+        <button class="tab" onclick="switchTab('departements', this)">🏛 Départements</button>
+    </div>
+
+    <!-- Toolbar (students tab only) -->
+    <div class="toolbar" id="toolbar">
+        <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="searchInput" type="text" placeholder="Rechercher par nom, CIN ou email…"/>
+        </div>
+        <button class="btn btn-ghost" onclick="reloadAll()">↺ Actualiser</button>
+        <button class="btn btn-primary" onclick="exportCSV()">⬇ CSV</button>
+    </div>
+
+    <!-- Department filter pills (students tab only) -->
+    <div class="dept-pills" id="deptPills"></div>
+
+    <!-- ── STUDENTS VIEW ── -->
+    <div id="viewEtudiants">
+        <div class="table-card">
+            <div class="table-header-row">
+                <div>#</div>
+                <div>Nom</div>
+                <div class="col-cin">CIN</div>
+                <div class="col-date">Naissance</div>
+                <div class="col-email">Email</div>
+                <div class="col-dept">Département</div>
+            </div>
+            <div id="tableBody">
+                <div class="state-box"><div class="spinner"></div><p>Chargement…</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── DEPARTMENTS VIEW ── -->
+    <div id="viewDepartements" style="display:none">
+        <div id="deptBody">
+            <div class="state-box"><div class="spinner"></div><p>Chargement…</p></div>
+        </div>
+    </div>
+
+    <footer>
+        iSeTT &nbsp;·&nbsp; <span>etudiant-service</span> &nbsp;·&nbsp; Spring Boot 3 &nbsp;·&nbsp; JDK 25
+    </footer>
+</div>
+
+<script>
+    let allEtudiants   = [];
+    let allDepartements = [];
+    let activeDept     = 'all';
+
+    /* ─── Bootstrap ─── */
+    async function reloadAll() {
+        await Promise.all([loadEtudiants(), loadDepartements()]);
+    }
+
+    async function loadEtudiants() {
+        setLoading('tableBody');
+        try {
+            const res = await fetch('/api/etudiants');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            allEtudiants = await res.json();
+            document.getElementById('statTotal').textContent = allEtudiants.length;
+            applyFilters();
+        } catch (err) {
+            document.getElementById('tableBody').innerHTML = errorBox(err.message);
+            document.getElementById('statTotal').textContent = '—';
+        }
+    }
+
+    async function loadDepartements() {
+        setLoading('deptBody');
+        try {
+            const res = await fetch('/api/departements');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            allDepartements = await res.json();
+            afterDeptsLoaded();
+        } catch {
+            /* Fallback: build dept list from embedded etudiant.departement */
+            const map = {};
+            allEtudiants.forEach(e => {
+                if (e.departement) {
+                    const d = e.departement;
+                    if (!map[d.id]) map[d.id] = { ...d, etudiants: [] };
+                    map[d.id].etudiants.push(e);
+                }
+            });
+            allDepartements = Object.values(map);
+            afterDeptsLoaded();
+        }
+    }
+
+    function afterDeptsLoaded() {
+        document.getElementById('statDepts').textContent = allDepartements.length;
+        renderDeptPills();
+        renderDepts();
+    }
+
+    /* ─── Tab switching ─── */
+    function switchTab(tab, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('viewEtudiants').style.display    = tab === 'etudiants'    ? '' : 'none';
+        document.getElementById('viewDepartements').style.display = tab === 'departements' ? '' : 'none';
+        document.getElementById('toolbar').style.display    = tab === 'etudiants' ? '' : 'none';
+        document.getElementById('deptPills').style.display  = tab === 'etudiants' ? '' : 'none';
+    }
+
+    /* ─── Dept filter pills ─── */
+    function renderDeptPills() {
+        document.getElementById('deptPills').innerHTML =
+            [{ id: 'all', nom: 'Tous' }, ...allDepartements].map(d =>
+                `<button class="pill ${d.id === activeDept ? 'active' : ''}"
+          onclick="setDeptFilter('${d.id}')">${escHtml(d.nom)}</button>`
+            ).join('');
+    }
+
+    function setDeptFilter(id) {
+        activeDept = id;
+        renderDeptPills();
+        applyFilters();
+    }
+
+    /* ─── Student filtering ─── */
+    function applyFilters() {
+        const q = document.getElementById('searchInput').value.trim().toLowerCase();
+        let list = allEtudiants;
+        if (activeDept !== 'all')
+            list = list.filter(e => e.departement && String(e.departement.id) === String(activeDept));
+        if (q)
+            list = list.filter(e =>
+                (e.nom   || '').toLowerCase().includes(q) ||
+                (e.cin   || '').toLowerCase().includes(q) ||
+                (e.email || '').toLowerCase().includes(q));
+        renderRows(list);
+    }
+
+    function renderRows(list) {
+        document.getElementById('statFiltered').textContent = list.length;
+        if (!list.length) {
+            document.getElementById('tableBody').innerHTML =
+                `<div class="state-box"><div class="state-icon">🔎</div><p>Aucun résultat.</p></div>`;
+            return;
+        }
+        document.getElementById('tableBody').innerHTML = list.map((e, i) => `
+      <div class="student-row" style="animation-delay:${i * 35}ms">
+        <div class="row-id">${String(e.id).padStart(3, '0')}</div>
+        <div class="row-nom">${escHtml(e.nom)}</div>
+        <div class="row-cin">${escHtml(e.cin)}</div>
+        <div><span class="badge badge-date">📅 ${fmt(e.dateNaissance)}</span></div>
+        <div class="row-email">${escHtml(e.email ?? '—')}</div>
+        <div>${e.departement
+            ? `<span class="badge badge-dept">🏛 ${escHtml(e.departement.nom)}</span>`
+            : `<span style="color:var(--muted);font-size:11px">—</span>`}</div>
+      </div>`).join('');
+    }
+
+    /* ─── Department cards ─── */
+    function renderDepts() {
+        const depts = allDepartements.map(d => ({
+            ...d,
+            etudiants: (d.etudiants && d.etudiants.length)
+                ? d.etudiants
+                : allEtudiants.filter(e => e.departement && e.departement.id === d.id)
+        }));
+
+        if (!depts.length) {
+            document.getElementById('deptBody').innerHTML =
+                `<div class="state-box"><div class="state-icon">🏛</div><p>Aucun département trouvé.</p></div>`;
+            return;
+        }
+
+        document.getElementById('deptBody').innerHTML = `
+      <div class="dept-grid">
+        ${depts.map(d => `
+          <div class="dept-card">
+            <div class="dept-card-header">
+              <div>
+                <div class="dept-name">${escHtml(d.nom)}</div>
+                <div style="font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:1px">Département #${d.id}</div>
+              </div>
+              <span class="dept-count">${d.etudiants.length} étudiant${d.etudiants.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div>
+              ${d.etudiants.length
+            ? d.etudiants.map(e => `
+                  <div class="dept-student-row">
+                    <div>
+                      <div class="dept-student-nom">${escHtml(e.nom)}</div>
+                      <div class="dept-student-cin">${escHtml(e.cin)}</div>
+                    </div>
+                    <div>
+                      <div class="dept-student-email">${escHtml(e.email ?? '')}</div>
+                      <div class="dept-student-age">📅 ${fmt(e.dateNaissance)}</div>
+                    </div>
+                  </div>`).join('')
+            : `<div class="dept-empty">Aucun étudiant dans ce département</div>`}
+            </div>
+          </div>`).join('')}
+      </div>`;
+    }
+
+    /* ─── CSV export ─── */
+    function exportCSV() {
+        if (!allEtudiants.length) return;
+        const header = 'ID,Nom,CIN,Email,Date naissance,Année inscription,Département\n';
+        const rows = allEtudiants.map(e =>
+            `${e.id},"${e.nom}","${e.cin}","${e.email ?? ''}","${e.dateNaissance ?? ''}","${e.anneePremiereInscription ?? ''}","${e.departement?.nom ?? ''}"`
+        ).join('\n');
+        const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'etudiants.csv'; a.click();
+    }
+
+    /* ─── Helpers ─── */
+    function fmt(iso) {
+        if (!iso) return '—';
+        const [y, m, d] = iso.split('-'); return `${d}/${m}/${y}`;
+    }
+    function escHtml(s) {
+        return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function setLoading(id) {
+        document.getElementById(id).innerHTML = '<div class="state-box"><div class="spinner"></div><p>Chargement…</p></div>';
+    }
+    function errorBox(msg) {
+        return `<div class="state-box error-state"><div class="state-icon">⚠</div><p>Impossible de joindre l'API.</p><p style="font-size:11px;margin-top:4px;color:var(--muted)">${msg}</p></div>`;
+    }
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    reloadAll();
+</script>
 </body>
 </html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Étudiants — iSeTT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:        #0b0f1a;
+            --surface:   #111827;
+            --card:      #161d2e;
+            --border:    #1e2d45;
+            --accent:    #00d4ff;
+            --accent2:   #ff6b35;
+            --text:      #e8edf5;
+            --muted:     #5a6a80;
+            --success:   #22c55e;
+            --radius:    12px;
+        }
+
+        html, body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+        }
+
+        /* ── Background grid ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                    linear-gradient(rgba(0,212,255,.04) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,212,255,.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Glow orbs ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .orb-1 { width: 500px; height: 500px; background: rgba(0,212,255,.07); top: -100px; left: -100px; }
+        .orb-2 { width: 400px; height: 400px; background: rgba(255,107,53,.06); bottom: -80px; right: -80px; }
+
+        /* ── Layout ── */
+        .wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 56px;
+            animation: fadeDown .6s ease both;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-badge {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent), #0080a0);
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: #fff;
+            letter-spacing: .5px;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        .logo-text span {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s ease infinite;
+        }
+
+        .status-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ── Hero section ── */
+        .hero {
+            margin-bottom: 40px;
+            animation: fadeDown .6s .1s ease both;
+        }
+
+        .hero h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -1px;
+        }
+
+        .hero h2 .accent { color: var(--accent); }
+
+        .hero p {
+            margin-top: 12px;
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: .5px;
+        }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            animation: fadeDown .6s .2s ease both;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        #searchInput {
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            font-size: 13px;
+            padding: 11px 14px 11px 38px;
+            border-radius: var(--radius);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        #searchInput:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0,212,255,.1);
+        }
+
+        #searchInput::placeholder { color: var(--muted); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 20px;
+            border-radius: var(--radius);
+            font-family: 'DM Mono', monospace;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: .5px;
+            cursor: pointer;
+            border: none;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #33ddff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(0,212,255,.3);
+        }
+
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── Stats strip ── */
+        .stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            animation: fadeDown .6s .25s ease both;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 140px;
+        }
+
+        .stat-icon {
+            font-size: 18px;
+            opacity: .8;
+        }
+
+        .stat-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .stat-lbl {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* ── Table card ── */
+        .table-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            animation: fadeUp .6s .3s ease both;
+        }
+
+        .table-header-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 1fr 1fr;
+            padding: 12px 24px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--muted);
+        }
+
+        /* ── Rows ── */
+        .student-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 1fr 1fr;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(30,45,69,.6);
+            transition: background .15s;
+            opacity: 0;
+            animation: rowIn .4s ease forwards;
+        }
+
+        .student-row:last-child { border-bottom: none; }
+
+        .student-row:hover {
+            background: rgba(0,212,255,.04);
+        }
+
+        .row-id {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .row-nom {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .row-cin {
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: .5px;
+        }
+
+        .row-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,212,255,.07);
+            color: var(--accent);
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(0,212,255,.15);
+            width: fit-content;
+        }
+
+        /* ── States ── */
+        .state-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 64px 24px;
+            color: var(--muted);
+        }
+
+        .state-icon { font-size: 40px; }
+
+        .state-box p {
+            font-size: 13px;
+            letter-spacing: .5px;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+        }
+
+        .error-state .state-icon { color: var(--accent2); }
+
+        /* ── Empty filtered ── */
+        #emptyFilter {
+            display: none;
+        }
+
+        /* ── Footer ── */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .5px;
+            animation: fadeDown .6s .4s ease both;
+        }
+
+        footer span { color: var(--accent); }
+
+        /* ── Animations ── */
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes rowIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: .4; }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .table-header-row,
+            .student-row {
+                grid-template-columns: 40px 1fr 1fr;
+            }
+            .col-date-header,
+            .row-date { display: none; }
+            .hero h2 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <div class="logo-badge">iST</div>
+            <div class="logo-text">
+                <h1>Étudiant Service</h1>
+                <span>Système de gestion académique</span>
+            </div>
+        </div>
+        <div class="header-meta">
+            <div class="status-dot"></div>
+            <span class="status-label">API connectée</span>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <div class="hero">
+        <h2>Liste des <span class="accent">Étudiants</span></h2>
+        <p>GET /api/etudiants — données en temps réel</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div>
+                <div class="stat-val" id="totalCount">—</div>
+                <div class="stat-lbl">Total étudiants</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔍</div>
+            <div>
+                <div class="stat-val" id="filteredCount">—</div>
+                <div class="stat-lbl">Affichés</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="searchInput" type="text" placeholder="Rechercher par nom ou CIN…"/>
+        </div>
+        <button class="btn btn-ghost" onclick="loadEtudiants()">↺ Actualiser</button>
+        <button class="btn btn-primary" onclick="exportCSV()">⬇ CSV</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="table-header-row">
+            <div>#</div>
+            <div>Nom complet</div>
+            <div>CIN</div>
+            <div class="col-date-header">Date de naissance</div>
+        </div>
+        <div id="tableBody">
+            <!-- Loading state -->
+            <div class="state-box" id="loadingState">
+                <div class="spinner"></div>
+                <p>Chargement des données…</p>
+            </div>
+        </div>
+        <div id="emptyFilter" class="state-box">
+            <div class="state-icon">🔎</div>
+            <p>Aucun résultat pour cette recherche.</p>
+        </div>
+    </div>
+
+    <footer>
+        iSeTT &nbsp;·&nbsp; <span>etudiant-service</span> &nbsp;·&nbsp; Spring Boot 3 &nbsp;·&nbsp; JDK 25
+    </footer>
+
+</div>
+
+<script>
+    let allEtudiants = [];
+
+    async function loadEtudiants() {
+        const body = document.getElementById('tableBody');
+        const emptyFilter = document.getElementById('emptyFilter');
+        emptyFilter.style.display = 'none';
+
+        body.innerHTML = `
+      <div class="state-box" id="loadingState">
+        <div class="spinner"></div>
+        <p>Chargement des données…</p>
+      </div>`;
+
+        try {
+            const res = await fetch('/api/etudiants');
+            if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+            allEtudiants = await res.json();
+            renderRows(allEtudiants);
+        } catch (err) {
+            body.innerHTML = `
+        <div class="state-box error-state">
+          <div class="state-icon">⚠</div>
+          <p>Impossible de joindre l'API.</p>
+          <p style="font-size:11px;margin-top:4px;color:var(--muted)">${err.message}</p>
+        </div>`;
+            document.getElementById('totalCount').textContent = '—';
+            document.getElementById('filteredCount').textContent = '—';
+        }
+    }
+
+    function formatDate(iso) {
+        if (!iso) return '—';
+        const [y, m, d] = iso.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    function renderRows(list) {
+        const body = document.getElementById('tableBody');
+        const emptyFilter = document.getElementById('emptyFilter');
+
+        document.getElementById('totalCount').textContent = allEtudiants.length;
+        document.getElementById('filteredCount').textContent = list.length;
+
+        if (list.length === 0) {
+            body.innerHTML = '';
+            emptyFilter.style.display = 'flex';
+            return;
+        }
+
+        emptyFilter.style.display = 'none';
+        body.innerHTML = list.map((e, i) => `
+      <div class="student-row" style="animation-delay:${i * 40}ms">
+        <div class="row-id">${String(e.id).padStart(3, '0')}</div>
+        <div class="row-nom">${escHtml(e.nom)}</div>
+        <div class="row-cin">${escHtml(e.cin)}</div>
+        <div><span class="row-date">📅 ${formatDate(e.dateNaissance)}</span></div>
+      </div>`).join('');
+    }
+
+    function escHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function exportCSV() {
+        if (!allEtudiants.length) return;
+        const header = 'ID,Nom,CIN,Date de naissance\n';
+        const rows = allEtudiants
+            .map(e => `${e.id},"${e.nom}","${e.cin}","${e.dateNaissance ?? ''}"`)
+            .join('\n');
+        const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'etudiants.csv';
+        a.click();
+    }
+
+    // Live search
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const filtered = allEtudiants.filter(e =>
+            e.nom.toLowerCase().includes(q) || e.cin.toLowerCase().includes(q)
+        );
+        renderRows(filtered);
+    });
+
+    // Initial load
+    loadEtudiants();
+</script>
+</body>
+</html>
